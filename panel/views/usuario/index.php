@@ -21,8 +21,10 @@ if (!isset($data) || !is_array($data)) {
         <a href="usuario.php?action=create" class="btn btn-success">
             <i class="bi bi-plus-circle"></i> Nuevo Usuario
         </a>
-        <a href="#" class="btn btn-primary" onclick="window.print(); return false;">
-            <i class="bi bi-printer"></i> Imprimir
+        <a href="reportes/reporte.php?tipo=usuarios&formato=pdf" 
+           class="btn btn-primary" 
+           target="_blank">
+            <i class="bi bi-file-pdf"></i> Imprimir
         </a>
     </div>
 

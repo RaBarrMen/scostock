@@ -38,8 +38,10 @@ foreach ($data as $item) {
         <a href="rol.php?action=listar" class="btn btn-secondary">
             <i class="bi bi-person-badge"></i> Gestionar Roles
         </a>
-        <a href="#" class="btn btn-primary" onclick="window.print(); return false;">
-            <i class="bi bi-printer"></i> Imprimir
+        <a href="reportes/reporte.php?tipo=usuario_rol&formato=pdf" 
+           class="btn btn-primary" 
+           target="_blank">
+            <i class="bi bi-file-pdf"></i> Imprimir
         </a>
     </div>
 

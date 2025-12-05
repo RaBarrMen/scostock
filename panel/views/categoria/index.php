@@ -22,7 +22,11 @@ if (!isset($data) || !is_array($data)) {
         <?php if ($esAdmin): ?>
             <a href="categoria.php?action=create" class="btn btn-success">Nueva</a>
         <?php endif; ?>
-        <a href="#" class="btn btn-primary" onclick="window.print(); return false;">Imprimir</a>
+        <a href="reportes/reporte.php?tipo=categorias&formato=pdf" 
+           class="btn btn-primary" 
+           target="_blank">
+            <i class="bi bi-file-pdf"></i> Imprimir
+        </a>
     </div>
 
     <?php if (empty($data)): ?>

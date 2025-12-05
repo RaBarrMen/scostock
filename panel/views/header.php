@@ -43,7 +43,9 @@
 
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link text-danger fw-bold" href="./../login.php">Cerrar sesión</a>
+          <a class="nav-link text-danger fw-bold" href="login.php?action=logout">
+            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+          </a>
         </li>
       </ul>
 
