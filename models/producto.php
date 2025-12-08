@@ -167,5 +167,34 @@ class Producto extends Sistema {
         return $sth->execute() ? 1 : 0;
     }
 
+    /* ============================================================
+    MÉTODOS PARA CATÁLOGO VENDEDOR
+    ============================================================ */
+
+    // Obtener solo productos activos
+    public function readActivos() {
+        $this->connect();
+        $sql = "SELECT p.*, c.nombre as categoria 
+                FROM producto p
+                LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+                WHERE p.activo = 1
+                ORDER BY p.nombre";
+        return $this->_DB->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Obtener productos activos por categoría
+    public function readByCategoria($id_categoria) {
+        $this->connect();
+        $sql = "SELECT p.*, c.nombre as categoria 
+                FROM producto p
+                LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+                WHERE p.activo = 1 AND p.id_categoria = :id_categoria
+                ORDER BY p.nombre";
+        $sth = $this->_DB->prepare($sql);
+        $sth->bindParam(":id_categoria", $id_categoria, PDO::PARAM_INT);
+        $sth->execute();
+        return $sth->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
 ?>

@@ -40,7 +40,6 @@ if (!isset($desdeRouter)) {
     <?php endif; ?>
 
     <form action="login.php?action=enviar_token" method="POST">
-
         <div class="mb-3">
             <label class="form-label">
                 <i class="bi bi-envelope"></i> Correo electrónico
@@ -60,7 +59,6 @@ if (!isset($desdeRouter)) {
         <a href="login.php?action=form" class="btn btn-link w-100">
             <i class="bi bi-arrow-left"></i> Volver al inicio de sesión
         </a>
-
     </form>
 
     <div class="mt-3 text-center">

@@ -25,12 +25,26 @@ $token = $_GET['token'] ?? '';
     </div>
 
     <?php if(isset($_GET['error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i>
-            <strong>Token inválido o expirado</strong><br>
-            Por favor solicita un nuevo enlace de recuperación.
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <?php if($_GET['error'] === 'no_coinciden'): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-triangle"></i>
+                Las contraseñas no coinciden
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php elseif($_GET['error'] === 'muy_corta'): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-triangle"></i>
+                La contraseña debe tener al menos 6 caracteres
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php else: ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-triangle"></i>
+                <strong>Token inválido o expirado</strong><br>
+                <a href="login.php?action=recuperar">Solicita un nuevo enlace</a>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
 
     <form action="login.php?action=reset_password" method="POST" id="formPassword">
@@ -74,7 +88,6 @@ $token = $_GET['token'] ?? '';
 </div>
 
 <script>
-// Validar que las contraseñas coincidan
 const password = document.getElementById('password');
 const passwordConfirm = document.getElementById('password_confirm');
 const passwordHelp = document.getElementById('passwordHelp');
@@ -88,7 +101,7 @@ function validarPassword() {
         passwordHelp.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Las contraseñas coinciden</span>';
         btnSubmit.disabled = false;
     } else {
-        passwordHelp.innerHTML = '';
+        passwordHelp.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-circle"></i> Mínimo 6 caracteres</span>';
         btnSubmit.disabled = true;
     }
 }
