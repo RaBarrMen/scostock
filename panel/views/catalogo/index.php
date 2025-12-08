@@ -3,10 +3,9 @@ if (!isset($desdeRouter)) {
     die("Acceso no autorizado");
 }
 
-// Verificar si es vendedor (para mostrar mensaje de bienvenida)
+// Verificar si es vendedor
 $esVendedor = in_array('VENDEDOR', array_map('strtoupper', $_SESSION['roles'] ?? []));
 
-// Asegurar que los datos existen
 if (!isset($productos) || !is_array($productos)) {
     $productos = [];
 }
@@ -27,7 +26,7 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
             <?php if ($esVendedor): ?>
                 <p class="text-muted">
                     <i class="bi bi-info-circle"></i> 
-                    Bienvenido, aquí puedes consultar nuestro inventario disponible
+                    Consulta inventario y actualiza stock
                 </p>
             <?php endif; ?>
         </div>
@@ -38,6 +37,33 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
             </span>
         </div>
     </div>
+
+    <!-- Alertas -->
+    <?php if (isset($_GET['success']) && $_GET['success'] === 'stock_actualizado'): ?>
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> Stock actualizado correctamente
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['error'])): ?>
+        <?php if ($_GET['error'] === 'stock_negativo'): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-triangle"></i> Error: El stock no puede ser negativo
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php elseif ($_GET['error'] === 'cantidad_invalida'): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-triangle"></i> Error: La cantidad debe ser un número positivo
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php else: ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-triangle"></i> Error al actualizar el stock
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
+    <?php endif; ?>
 
     <!-- Filtro por categoría -->
     <div class="card mb-4">
@@ -83,10 +109,27 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
         <!-- Grid de productos (Cards) -->
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
             <?php foreach ($productos as $prod): ?>
+            <?php
+            // Obtener stock
+            $stockActual = intval($prod['stock'] ?? 0);
+            $minStock = intval($prod['min_stock'] ?? 0);
+            
+            // Determinar color del badge de stock
+            if ($stockActual <= 0) {
+                $stockBadge = 'bg-danger';
+                $stockIcon = 'bi-x-circle';
+            } elseif ($stockActual <= $minStock) {
+                $stockBadge = 'bg-warning text-dark';
+                $stockIcon = 'bi-exclamation-triangle';
+            } else {
+                $stockBadge = 'bg-success';
+                $stockIcon = 'bi-check-circle';
+            }
+            ?>
             <div class="col">
                 <div class="card h-100 shadow-sm hover-card">
                     <!-- Imagen del producto -->
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center position-relative" 
                          style="height: 200px; overflow: hidden;">
                         <?php if (!empty($prod['imagen'])): ?>
                             <img src="../images/producto/<?= htmlspecialchars($prod['imagen']) ?>" 
@@ -95,6 +138,12 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
                         <?php else: ?>
                             <i class="bi bi-box-seam text-muted" style="font-size: 4rem;"></i>
                         <?php endif; ?>
+                        
+                        <!-- Badge de stock en la esquina -->
+                        <span class="position-absolute top-0 end-0 m-2 badge <?= $stockBadge ?>">
+                            <i class="<?= $stockIcon ?>"></i> 
+                            Stock: <?= $stockActual ?>
+                        </span>
                     </div>
 
                     <div class="card-body d-flex flex-column">
@@ -129,12 +178,19 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
                                 por <?= htmlspecialchars($prod['unidad_medida']) ?>
                             </p>
 
-                            <!-- Botón Ver Detalles -->
-                            <button class="btn btn-outline-primary btn-sm w-100" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#modalDetalle<?= $prod['id_producto'] ?>">
-                                <i class="bi bi-eye"></i> Ver detalles
-                            </button>
+                            <!-- Botones -->
+                            <div class="btn-group w-100 mb-2">
+                                <button class="btn btn-outline-primary btn-sm" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalDetalle<?= $prod['id_producto'] ?>">
+                                    <i class="bi bi-eye"></i> Detalles
+                                </button>
+                                <button class="btn btn-outline-success btn-sm" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalStock<?= $prod['id_producto'] ?>">
+                                    <i class="bi bi-arrow-repeat"></i> Stock
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -180,6 +236,19 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th>Stock Actual:</th>
+                                    <td>
+                                        <span class="badge <?= $stockBadge ?>">
+                                            <i class="<?= $stockIcon ?>"></i>
+                                            <?= $stockActual ?> unidades
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Stock Mínimo:</th>
+                                    <td><?= $minStock ?></td>
+                                </tr>
+                                <tr>
                                     <th>Unidad de Medida:</th>
                                     <td><?= htmlspecialchars($prod['unidad_medida']) ?></td>
                                 </tr>
@@ -207,10 +276,6 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
                                         </span>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th>Stock Mínimo:</th>
-                                    <td><?= $prod['min_stock'] ?></td>
-                                </tr>
                             </table>
                         </div>
                         <div class="modal-footer">
@@ -221,6 +286,73 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
                     </div>
                 </div>
             </div>
+
+            <!-- Modal de actualización de stock -->
+            <div class="modal fade" id="modalStock<?= $prod['id_producto'] ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form action="catalogo.php?action=actualizar_stock" method="POST">
+                            <input type="hidden" name="id_producto" value="<?= $prod['id_producto'] ?>">
+                            
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-arrow-repeat"></i> 
+                                    Actualizar Stock
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            
+                            <div class="modal-body">
+                                <h5><?= htmlspecialchars($prod['nombre']) ?></h5>
+                                <p class="text-muted">SKU: <?= htmlspecialchars($prod['sku']) ?></p>
+                                
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    <strong>Stock actual:</strong> <?= $stockActual ?> unidades
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="bi bi-list-task"></i> Tipo de movimiento
+                                    </label>
+                                    <select name="tipo" class="form-select" required>
+                                        <option value="ENTRADA">➕ Entrada (Agregar stock)</option>
+                                        <option value="SALIDA">➖ Salida (Quitar stock)</option>
+                                        <option value="AJUSTE">⚙️ Ajuste (Establecer cantidad exacta)</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="bi bi-123"></i> Cantidad
+                                    </label>
+                                    <input type="number" 
+                                           name="cantidad" 
+                                           class="form-control" 
+                                           min="0" 
+                                           step="1"
+                                           required
+                                           placeholder="Ingresa la cantidad">
+                                    <small class="form-text text-muted">
+                                        Para ENTRADA/SALIDA: cantidad a sumar/restar<br>
+                                        Para AJUSTE: nueva cantidad total
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i> Actualizar Stock
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
@@ -240,7 +372,7 @@ function filtrarCategoria() {
 }
 </script>
 
-<!-- Estilos adicionales para efecto hover -->
+<!-- Estilos adicionales -->
 <style>
 .hover-card {
     transition: transform 0.2s, box-shadow 0.2s;

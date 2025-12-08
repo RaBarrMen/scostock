@@ -196,5 +196,62 @@ class Producto extends Sistema {
         return $sth->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /* ============================================================
+    MÉTODOS PARA GESTIÓN DE STOCK
+    ============================================================ */
+
+    // Actualizar stock de un producto
+    public function actualizarStock($id_producto, $tipo, $cantidad) {
+        $this->connect();
+
+        // Obtener stock actual
+        $producto = $this->readOne($id_producto);
+        if (!$producto) {
+            return false;
+        }
+
+        $stock_actual = intval($producto['stock'] ?? 0);
+        $nuevo_stock = 0;
+
+        // Calcular nuevo stock según el tipo
+        switch ($tipo) {
+            case 'ENTRADA':
+                $nuevo_stock = $stock_actual + intval($cantidad);
+                break;
+            case 'SALIDA':
+                $nuevo_stock = $stock_actual - intval($cantidad);
+                break;
+            case 'AJUSTE':
+                $nuevo_stock = intval($cantidad); // Ajuste directo
+                break;
+            default:
+                return false;
+        }
+
+        // Validar que no sea negativo
+        if ($nuevo_stock < 0) {
+            return -1; // Stock negativo
+        }
+
+        // Actualizar en la base de datos
+        $sql = "UPDATE producto SET stock = :stock WHERE id_producto = :id";
+        $sth = $this->_DB->prepare($sql);
+        $sth->bindParam(":stock", $nuevo_stock, PDO::PARAM_INT);
+        $sth->bindParam(":id", $id_producto, PDO::PARAM_INT);
+
+        return $sth->execute() ? 1 : 0;
+    }
+
+    // Obtener productos con stock bajo
+    public function getProductosStockBajo() {
+        $this->connect();
+        $sql = "SELECT p.*, c.nombre as categoria 
+                FROM producto p
+                LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+                WHERE p.stock <= p.min_stock AND p.activo = 1
+                ORDER BY p.stock ASC";
+        return $this->_DB->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
 ?>
