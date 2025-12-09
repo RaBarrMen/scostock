@@ -11,6 +11,17 @@ if (!isset($desdeRouter)) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <title>Login SCOSTOCK</title>
+
+    <style>
+        .logo-scostock {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;      /* <-- esto la hace circular */
+            object-fit: contain;     /* que se vea completa dentro del círculo */
+            background-color: #f8f9fa; /* opcional: fondito claro detrás */
+            padding: 6px;            /* opcional: margen interno */
+        }
+    </style>
 </head>
 
 <body class="bg-light d-flex justify-content-center align-items-center vh-100">
@@ -18,6 +29,9 @@ if (!isset($desdeRouter)) {
 <div class="card shadow p-4" style="width: 380px;">
     <div class="text-center mb-3">
         <!--i class="bi bi-box-seam text-primary" style="font-size: 3rem;"></i-->
+        <img src="../images/img/logo_scostock.png"
+             alt="ScoStock logo"
+             class="mb-2 logo-scostock">             
         <h3 class="mt-2">SCOSTOCK</h3>
         <p class="text-muted small">Sistema de Control de Stock</p>
     </div>

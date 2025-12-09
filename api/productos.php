@@ -58,8 +58,7 @@ switch ($method) {
         break;
 
     /* ==========================================
-       POST - Crear producto (CON IMAGEN)
-       Usa multipart/form-data
+       POST - Crear producto 
     ========================================== */
     case 'POST':
         // Verificar si viene JSON o FormData

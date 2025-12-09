@@ -1,5 +1,5 @@
 <?php
-// ✅ IMPORTANTE: Iniciar output buffering ANTES de cualquier cosa
+// IMPORTANTE: Iniciar output buffering ANTES de cualquier cosa
 ob_start();
 
 session_start();
@@ -106,16 +106,24 @@ switch ($tipo) {
         $vista = 'rol_privilegio';
         break;
     
+        case 'producto_proveedor':
+            require_once "../../models/producto_proveedor.php";
+            $productoProveedorModel = new ProductoProveedor();
+            $titulo = 'Reporte de Productos y Proveedores';
+            $data = $productoProveedorModel->read();
+            $vista = 'producto_proveedor';
+            break;
+    
     default:
         die("Tipo de reporte no válido");
 }
 
 // Si se solicita PDF, generar y mostrar
 if ($formato === 'pdf') {
-    // ✅ Limpiar cualquier salida previa
+    // Limpiar cualquier salida previa
     ob_end_clean();
     
-    // ✅ Iniciar nuevo buffer limpio
+    // Iniciar nuevo buffer limpio
     ob_start();
     
     require_once '../../vendor/autoload.php';
@@ -130,7 +138,7 @@ if ($formato === 'pdf') {
     $dompdf->setPaper('A4', 'portrait');
     $dompdf->render();
     
-    // ✅ Enviar el PDF al navegador
+    // Enviar el PDF al navegador
     $dompdf->stream("reporte_{$tipo}_" . date('Y-m-d') . ".pdf", ["Attachment" => false]);
     exit;
 }

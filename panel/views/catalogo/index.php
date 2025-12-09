@@ -14,7 +14,12 @@ if (!isset($categorias) || !is_array($categorias)) {
     $categorias = [];
 }
 
+if (!isset($proveedores) || !is_array($proveedores)) {
+    $proveedores = [];
+}
+
 $categoriaSeleccionada = $_GET['categoria'] ?? null;
+$proveedorSeleccionado = $_GET['proveedor'] ?? null;
 ?>
 
 <div class="container mt-4">
@@ -65,17 +70,18 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
         <?php endif; ?>
     <?php endif; ?>
 
-    <!-- Filtro por categoría -->
+    <!-- Filtros -->
     <div class="card mb-4">
         <div class="card-body">
-            <div class="row align-items-center">
+            <!-- Filtro por Categoría -->
+            <div class="row align-items-center mb-3">
                 <div class="col-md-3">
                     <label class="form-label fw-bold">
                         <i class="bi bi-funnel"></i> Filtrar por categoría:
                     </label>
                 </div>
-                <div class="col-md-7">
-                    <select class="form-select" id="filtroCategoria" onchange="filtrarCategoria()">
+                <div class="col-md-9">
+                    <select class="form-select" id="filtroCategoria" onchange="aplicarFiltros()">
                         <option value="">📦 Todas las categorías</option>
                         <?php foreach ($categorias as $cat): ?>
                             <option value="<?= $cat['id_categoria'] ?>" 
@@ -85,12 +91,76 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <a href="catalogo.php?action=listar" class="btn btn-outline-secondary w-100">
-                        <i class="bi bi-x-circle"></i> Limpiar
+            </div>
+
+            <!-- Filtro por Proveedor -->
+            <div class="row align-items-center mb-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-truck"></i> Filtrar por proveedor:
+                    </label>
+                </div>
+                <div class="col-md-9">
+                    <select class="form-select" id="filtroProveedor" onchange="aplicarFiltros()">
+                        <option value="">🚚 Todos los proveedores</option>
+                        <?php foreach ($proveedores as $prov): ?>
+                            <option value="<?= $prov['id_proveedor'] ?>" 
+                                    <?= $proveedorSeleccionado == $prov['id_proveedor'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($prov['nombre']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="row">
+                <div class="col-md-12 text-end">
+                    <a href="catalogo.php?action=listar" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Limpiar Filtros
                     </a>
                 </div>
             </div>
+
+            <!-- Indicador de filtros activos -->
+            <?php if ($categoriaSeleccionada || $proveedorSeleccionado): ?>
+            <div class="mt-3">
+                <strong>Filtros activos:</strong>
+                <?php if ($categoriaSeleccionada): ?>
+                    <?php 
+                    $catNombre = '';
+                    foreach ($categorias as $cat) {
+                        if ($cat['id_categoria'] == $categoriaSeleccionada) {
+                            $catNombre = $cat['nombre'];
+                            break;
+                        }
+                    }
+                    ?>
+                    <span class="badge bg-info me-2">
+                        <i class="bi bi-tag"></i> <?= htmlspecialchars($catNombre) ?>
+                        <a href="catalogo.php?action=listar<?= $proveedorSeleccionado ? '&proveedor=' . $proveedorSeleccionado : '' ?>" 
+                           class="text-white text-decoration-none ms-1">×</a>
+                    </span>
+                <?php endif; ?>
+                
+                <?php if ($proveedorSeleccionado): ?>
+                    <?php 
+                    $provNombre = '';
+                    foreach ($proveedores as $prov) {
+                        if ($prov['id_proveedor'] == $proveedorSeleccionado) {
+                            $provNombre = $prov['nombre'];
+                            break;
+                        }
+                    }
+                    ?>
+                    <span class="badge bg-success me-2">
+                        <i class="bi bi-truck"></i> <?= htmlspecialchars($provNombre) ?>
+                        <a href="catalogo.php?action=listar<?= $categoriaSeleccionada ? '&categoria=' . $categoriaSeleccionada : '' ?>" 
+                           class="text-white text-decoration-none ms-1">×</a>
+                    </span>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -98,8 +168,8 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
         <div class="alert alert-info text-center py-5">
             <i class="bi bi-inbox" style="font-size: 3rem;"></i>
             <h4 class="mt-3">No hay productos disponibles</h4>
-            <?php if ($categoriaSeleccionada): ?>
-                <p>No se encontraron productos en esta categoría.</p>
+            <?php if ($categoriaSeleccionada || $proveedorSeleccionado): ?>
+                <p>No se encontraron productos con los filtros seleccionados.</p>
                 <a href="catalogo.php?action=listar" class="btn btn-primary">
                     <i class="bi bi-arrow-left"></i> Ver todos los productos
                 </a>
@@ -358,17 +428,23 @@ $categoriaSeleccionada = $_GET['categoria'] ?? null;
     <?php endif; ?>
 </div>
 
-<!-- Script para filtro -->
+<!-- Script para filtros -->
 <script>
-function filtrarCategoria() {
-    const select = document.getElementById('filtroCategoria');
-    const categoria = select.value;
+function aplicarFiltros() {
+    const categoria = document.getElementById('filtroCategoria').value;
+    const proveedor = document.getElementById('filtroProveedor').value;
+    
+    let url = 'catalogo.php?action=listar';
     
     if (categoria) {
-        window.location.href = `catalogo.php?action=listar&categoria=${categoria}`;
-    } else {
-        window.location.href = 'catalogo.php?action=listar';
+        url += '&categoria=' + categoria;
     }
+    
+    if (proveedor) {
+        url += '&proveedor=' + proveedor;
+    }
+    
+    window.location.href = url;
 }
 </script>
 

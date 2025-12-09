@@ -11,12 +11,30 @@ $tieneAccesoAdmin = $esAdmin || $esOperador || $esPropietario;
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<!-- ApexCharts para gráficas -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+
+<!-- QRCode.js para códigos QR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+        .logo-scostock {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;      
+            object-fit: contain;     
+            background-color: #f8f9fa; 
+            padding: 6px;            
+        }
+    </style>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm mb-4">
   <div class="container-fluid">
 
     <a class="navbar-brand fw-bold" href="<?= $esVendedor ? 'catalogo.php?action=listar' : 'categoria.php?action=listar' ?>">
-      <i class="bi bi-box-seam"></i> 
+      <img src="../images/img/logo_scostock.png"
+             alt="ScoStock logo"
+             class="mb-2 logo-scostock">       
       ScoStock <?= $esVendedor ? 'Vendedor' : 'Admin' ?>
     </a>
 
@@ -56,6 +74,15 @@ $tieneAccesoAdmin = $esAdmin || $esOperador || $esPropietario;
           </a>
         </li>
 
+        <!-- Dashboard (Admin, Operador, Propietario) -->
+                <?php if ($tieneAccesoAdmin): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="dashboard.php">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <?php endif; ?>
+
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
             <i class="bi bi-gear"></i> Usuarios & Roles
@@ -77,6 +104,9 @@ $tieneAccesoAdmin = $esAdmin || $esOperador || $esPropietario;
             <li><a class="dropdown-item" href="rol_privilegio.php?action=listar">
               <i class="bi bi-shield-check"></i> Rol - Privilegio
             </a></li>
+            <li><a class="dropdown-item" href="producto_proveedor.php?action=listar">
+              <i class="bi bi-link-45deg"></i> Producto - Proveedor
+            </a></li>
           </ul>
         </li>
 
@@ -97,15 +127,6 @@ $tieneAccesoAdmin = $esAdmin || $esOperador || $esPropietario;
             </a></li>
             
             <li><hr class="dropdown-divider"></li>
-            <li><h6 class="dropdown-header">Inventario</h6></li>
-            <li><a class="dropdown-item" href="reportes/reporte.php?tipo=productos_stock_bajo&formato=pdf" target="_blank">
-              <i class="bi bi-exclamation-triangle text-danger"></i> Stock Bajo
-            </a></li>
-            <li><a class="dropdown-item" href="reportes/reporte.php?tipo=productos_por_categoria&formato=pdf" target="_blank">
-              <i class="bi bi-grid"></i> Por Categoría
-            </a></li>
-            
-            <li><hr class="dropdown-divider"></li>
             <li><h6 class="dropdown-header">Seguridad</h6></li>
             <li><a class="dropdown-item" href="reportes/reporte.php?tipo=usuarios&formato=pdf" target="_blank">
               <i class="bi bi-people"></i> Usuarios
@@ -121,10 +142,11 @@ $tieneAccesoAdmin = $esAdmin || $esOperador || $esPropietario;
             </a></li>
             <li><a class="dropdown-item" href="reportes/reporte.php?tipo=rol_privilegio&formato=pdf" target="_blank">
               <i class="bi bi-shield-check"></i> Rol-Privilegio
-            </a></li>
-            <li><a class="dropdown-item" href="reportes/reporte.php?tipo=roles_privilegios&formato=pdf" target="_blank">
-              <i class="bi bi-diagram-3"></i> Matriz Completa
-            </a></li>
+            </a></li>  
+            <li><a class="dropdown-item" href="reportes/reporte.php?tipo=producto_proveedor&formato=pdf" target="_blank">
+              <i class="bi bi-link-45deg"></i> Producto-Proveedor
+            </a></li>          
+            
           </ul>
         </li>
 
